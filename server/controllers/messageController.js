@@ -5,8 +5,8 @@ import Message from '../models/message.js'
 const connections = {}
 
 //Controller function for the SSE ednpoint
-export const sseController = (req , res)=> {
-    const {userId} = req.params
+export const sseController = (req, res) => {
+    const { userId } = req.params
     console.log('new client connected: ', userId)
 
     //Set SSE headers
@@ -21,23 +21,23 @@ export const sseController = (req , res)=> {
     res.write('log: Connected to SSE stream\n\n')
 
     //Handle client disconnections
-    req.on('close', ()=> {
+    req.on('close', () => {
         delete connections[userId]
         console.log('Client disconnected')
     })
 }
 
 //Send message
-export const sendMessage = async (req, res)=> {
+export const sendMessage = async (req, res) => {
     try {
-        const {userId} = req.auth();
-        const {to_user_id, text} = req.body
+        const { userId } = req.auth();
+        const { to_user_id, text } = req.body
         const image = req.file
 
         let media_url = ''
         let message_type = image ? 'image' : 'text'
 
-        if(message_type === 'image'){
+        if (message_type === 'image') {
             const fileBuffer = fs.readFileSync(image.path)
             const response = await imagekit.upload({
                 file: fileBuffer,
@@ -46,9 +46,9 @@ export const sendMessage = async (req, res)=> {
             media_url = imagekit.url({
                 path: response.filePath,
                 transformation: [
-                    {quality: 'auto'},
-                    {format: 'webp'},
-                    {width: '1280'}
+                    { quality: 'auto' },
+                    { format: 'webp' },
+                    { width: '1280' }
                 ]
             })
         }
@@ -60,50 +60,50 @@ export const sendMessage = async (req, res)=> {
             message_type,
             media_url
         })
-        res.json({success: true, message})
+        res.json({ success: true, message })
 
         //Send message to to_user_id using SSE
         const messageWithUserData = await Message.findById(message._id).populate('from_user_id')
 
-        if(connections[to_user_id]){
+        if (connections[to_user_id]) {
             connections[to_user_id].write(`data: ${JSON.stringify(messageWithUserData)}\n\n`)
         }
 
     } catch (error) {
-         console.log(error)
+        console.log(error)
         return res.json({ success: false, message: error.message })
     }
 }
 
 //Get chat messages (9:18)
-export const getChatMessages = async (req, res)=> {
+export const getChatMessages = async (req, res) => {
     try {
-        const {userId} = req.auth()
-        const {to_user_id} = req.body
+        const { userId } = req.auth()
+        const { to_user_id } = req.body
 
         const messages = await Message.find({
             $or: [
-                {from_user_id: userId, to_user_id},
-                {from_user_id: to_user_id, to_user_id: userId},
+                { from_user_id: userId, to_user_id },
+                { from_user_id: to_user_id, to_user_id: userId },
             ]
-        }).sort({created_at: -1})
+        }).sort({ created_at: -1 })
 
         //mark to seen the messages
-        await Message.updateMany({from_user_id: to_user_id, to_user_id: userId}, {seen: true})
+        await Message.updateMany({ from_user_id: to_user_id, to_user_id: userId }, { seen: true })
 
-        res.json({success: true, messages})
+        res.json({ success: true, messages })
 
     } catch (error) {
         return res.json({ success: false, message: error.message })
     }
 }
 
-export const getUserRecentMessages = async (req, res)=> {
+export const getUserRecentMessages = async (req, res) => {
     try {
-        const {userId} = req.auth()
-        const messages = await Message.find({to_user_id: userId}.populate('from_user_id to_user_id')).sort({created_at: -1})
+        const { userId } = req.auth()
+        const messages = await Message.find({ to_user_id: userId }).populate('from_user_id to_user_id').sort({ created_at: -1 })
 
-        res.json({success: true, messages})
+        res.json({ success: true, messages })
 
     } catch (error) {
         return res.json({ success: false, message: error.message })

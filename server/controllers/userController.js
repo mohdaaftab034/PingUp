@@ -2,8 +2,8 @@ import imagekit from "../configs/imageKit.js";
 import { inngest } from "../inngest/index.js";
 import Connection from "../models/connection.js";
 import Post from "../models/postModel.js";
-import User from "../models/userModel.js";
 import fs from 'fs'
+import User from "../models/userModel.js";
 
 
 //Get User data using userId
@@ -172,7 +172,7 @@ export const unfollowUser = async (req, res) => {
 export const sendConnectionRequest = async (req, res) => {
     try {
         const { userId } = req.auth()
-        const { id } = req.body()
+        const { id } = req.body
 
         //Check if user has sent more then 20 request in the last 24 hours
         const last24Hours = new Date(Date.now() - 24 * 60 * 60 * 1000)
@@ -181,7 +181,7 @@ export const sendConnectionRequest = async (req, res) => {
             return res.json({ success: false, message: "You have sent the more than 20 requests in the last 24 hours" })
         }
         //check if user are already connected
-        const connection = await Connection.find({
+        const connection = await Connection.findOne({
             $or: [
                 { from_user_id: userId, to_user_id: id },
                 { from_user_id: id, to_user_id: userId },
@@ -215,8 +215,8 @@ export const sendConnectionRequest = async (req, res) => {
 export const getUserConnection = async (req, res) => {
     try {
         const { userId } = req.auth()
-        const user = await User.findById(userId).populate('connection followers following')
-
+        const user = await User.findById(userId).populate('connections followers following')
+        
         const connections = user.connections
         const followers = user.followers
         const following = user.following

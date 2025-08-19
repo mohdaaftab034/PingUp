@@ -8,7 +8,7 @@ const UserProfileInfo = ({user, posts, profileId, setShowEdit}) => {
         <div className='flex flex-col md:flex-row items-start gap-6'>
 
             <div className='w-32 h-32 border-4 border-white shadow-lg absolute -top-16 rounded-full'>
-                <img src={user.profile_picture} className='absolute rounded-full z-2' alt="" />
+                <img src={user.profile_picture} className='absolute rounded-full z-2 w-full h-full' alt="" />
             </div>
 
             <div className='w-full pt-16 md:pt-0 md:pl-36'>
