@@ -89,7 +89,7 @@ const sendNewConnectionRequestReminder = inngest.createFunction(
             })
         })
 
-        const in24Hours = new Date(Date.now() * 24 * 60 * 60 * 1000)
+        const in24Hours = new Date(Date.now() + 24 * 60 * 60 * 1000)
         await step.sleepUntil("wait-for-24-hours", in24Hours)
         await step.run('send-connection-request-reminder', async () => {
             const connection = await Connection.findById(connectionId).populate('from_user_id to_user_id')
@@ -120,18 +120,22 @@ const sendNewConnectionRequestReminder = inngest.createFunction(
 
 //Inngest function to delete story after 24 hours
 const deleteStory = inngest.createFunction(
-    {id: 'story-delete'},
-    {event: 'app/story.delete'},
-    async ({event, step})=> {
-        const {storyId} = event.data
-        const in24Hours = new Date(Date.now() * 24 * 60 * 60 * 1000)
-        await step.sleepUntil('wait-for-24-hours', in24Hours)
-        await step.run("delete-story", async ()=> {
-            await Story.findOneAndUpdate(storyId)
-            return {message: "Story deleted"}
-        })
-    }
-)
+  { id: 'story-delete' },
+  { event: 'app/story.delete' },
+  async ({ event, step }) => {
+    const { storyId } = event.data;
+
+    // Wait for 24 hours
+    const in24Hours = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    await step.sleepUntil('wait-for-24-hours', in24Hours);
+
+    // Delete story
+    await step.run("delete-story", async () => {
+      await Story.findByIdAndDelete(storyId);
+      return { message: "Story deleted" };
+    });
+  }
+);
 
 const sendNotificationsOnunseenMessages = inngest.createFunction(
     {id: 'send-unseen-messages-notification'},
