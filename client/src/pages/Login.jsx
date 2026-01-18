@@ -1,38 +1,273 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { assets } from '../assets/assets'
-import { Star } from 'lucide-react'
-import {SignIn} from '@clerk/clerk-react'
+import { Star, Mail, Lock, User, AtSign, Eye, EyeOff, ArrowRight } from 'lucide-react'
+import { useAuth } from '../context/AuthProvider.jsx'
+import toast from 'react-hot-toast'
+import { useDispatch } from 'react-redux'
+import { setUser } from '../features/user/userSlice.js'
+import { useNavigate } from 'react-router-dom'
+import Button from '../components/Button'
+import { useButtonLoader } from '../hooks/useButtonLoader'
+import { motion, AnimatePresence } from 'framer-motion'
 
-const login = () => {
-  return (
-    <div className='min-h-screen flex flex-col md:flex-row'>
-        {/* background image */}
-        <img src={assets.bgImage} alt="" className='absolute top-0 left-0 -z-1 w-full h-full object-cover'/>
+const Login = () => {
+    const navigate = useNavigate()
+    const dispatch = useDispatch()
+    const { login, register, user } = useAuth()
 
-        {/* left side */}
-        <div className='flex-1 flex flex-col items-start justify-between p-6 md:p-10 lg:pl-40'>
-            <img src={assets.logo} alt="" className='h-12 object-contain'/>
-            <div>
-                <div className='flex items-center gap-3 mb-4 max-md:mt-10'>
-                    <img src={assets.group_users} alt="" className='h-8 md:h-10'/>
-                    <div>
-                        <div className='flex'>
-                            {Array(5).fill(0).map((_, i)=> (<Star key={i} className='size-4 md:size-4.5 text-transparent fill-amber-500' />))}
-                        </div>
-                        <p>Used by 12k+ developers</p>
-                    </div>
-                </div>
-                <h1 className='text-3xl md:text-6xl md:pb-2 font-bold bg-gradient-to-r from-indigo-950 to bg-indigo-800 bg-clip-text text-transparent'>More than just friends truly connect</h1>
-                <p className='text-xl md:text-3xl text-indigo-900 max-w-72 md:max-w-md'>connect with global community on pingup.</p>
+    const [mode, setMode] = useState('login')
+    const [showPassword, setShowPassword] = useState(false)
+    const [form, setForm] = useState({
+        full_name: '',
+        username: '',
+        email: '',
+        password: '',
+    })
+
+    useEffect(() => {
+        if (user) navigate('/')
+    }, [user, navigate])
+
+    const handleChange = (e) => {
+        const { name, value } = e.target
+        setForm((prev) => ({ ...prev, [name]: value }))
+    }
+
+    const handleAuthSubmit = async (e) => {
+        e.preventDefault()
+
+        if (mode === 'register' && (!form.full_name || !form.username)) {
+            toast.error('Please provide your name and username')
+            throw new Error('Missing fields')
+        }
+
+        if (!form.email || !form.password) {
+            toast.error('Email and password are required')
+            throw new Error('Missing fields')
+        }
+
+        const action = mode === 'login' ? login(form.email, form.password) : register(form)
+        const result = await action
+
+        if (result.success) {
+            dispatch(setUser(result.user))
+            navigate('/')
+        } else {
+            throw new Error(result.message || 'Authentication failed')
+        }
+    }
+
+    const { loading: authLoading, handleClick: handleSubmit } = useButtonLoader(
+        handleAuthSubmit,
+        {
+            minDuration: 800, // Slightly longer for smooth feel
+            onError: (error) => toast.error(error.message)
+        }
+    )
+
+    // Animation Variants
+    const slideUp = {
+        hidden: { opacity: 0, y: 20 },
+        visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+    }
+
+    return (
+        <div className='min-h-screen w-full flex relative overflow-hidden bg-slate-900'>
+
+            {/* --- Animated Background Gradient (CSS Only fallback if image fails) --- */}
+            <div className="absolute inset-0 z-0">
+                <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-600/30 blur-[120px] animate-pulse" />
+                <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-pink-600/20 blur-[120px] animate-pulse delay-1000" />
+                {/* Overlay Image if present, otherwise gradient shows */}
+                <img
+                    src={assets.bgImage}
+                    alt=""
+                    className='absolute top-0 left-0 w-full h-full object-cover opacity-40 mix-blend-overlay'
+                />
             </div>
-            <span className='md:h-10'></span>
+
+            <div className="container mx-auto flex flex-col md:flex-row h-full z-10 relative">
+
+                {/* --- Left Side: Brand Identity --- */}
+                <div className='flex-1 flex flex-col justify-center p-8 md:p-16 lg:p-24'>
+                    <motion.div
+                        initial="hidden"
+                        animate="visible"
+                        variants={slideUp}
+                        className="space-y-8"
+                    >
+                        {/* Logo Area */}
+                        <div className='flex items-center gap-3'>
+                            <img src={assets.logo} alt="PingUp" className='h-10 w-10 object-contain' />
+                            <span className="text-2xl font-bold text-white tracking-tight">PingUp.</span>
+                        </div>
+
+                        {/* Hero Text */}
+                        <div>
+                            <h1 className='text-4xl md:text-6xl font-extrabold text-white leading-tight mb-6'>
+                                Connect beyond <br />
+                                <span className='text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-pink-400'>
+                                    the timeline.
+                                </span>
+                            </h1>
+                            <p className='text-lg text-slate-300 max-w-md leading-relaxed'>
+                                Join the global community where conversations happen in real-time. Share your world, uncensored and unfiltered.
+                            </p>
+                        </div>
+
+                        {/* Social Proof */}
+                        <div className='flex items-center gap-4 pt-4'>
+                            <div className="flex -space-x-3">
+                                {[1, 2, 3, 4].map((i) => (
+                                    <div key={i} className="w-10 h-10 rounded-full border-2 border-slate-900 bg-slate-700 overflow-hidden">
+                                        <img src={`https://i.pravatar.cc/100?img=${i + 10}`} alt="" className="w-full h-full object-cover" />
+                                    </div>
+                                ))}
+                                <div className="w-10 h-10 rounded-full border-2 border-slate-900 bg-indigo-600 flex items-center justify-center text-xs font-bold text-white">
+                                    +12k
+                                </div>
+                            </div>
+                            <div className='flex flex-col'>
+                                <div className='flex text-amber-400'>
+                                    {[...Array(5)].map((_, i) => <Star key={i} size={14} fill="currentColor" />)}
+                                </div>
+                                <span className='text-sm text-slate-400 font-medium'>Trusted by developers</span>
+                            </div>
+                        </div>
+                    </motion.div>
+                </div>
+
+                {/* --- Right Side: Auth Form --- */}
+                <div className='flex-1 flex items-center justify-center p-4 md:p-10'>
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.5, delay: 0.2 }}
+                        className='w-full max-w-[420px] bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl rounded-3xl p-8'
+                    >
+                        <div className='mb-8'>
+                            <h2 className='text-3xl font-bold text-white mb-2'>
+                                {mode === 'login' ? 'Welcome back' : 'Join PingUp'}
+                            </h2>
+                            <p className='text-slate-400'>
+                                {mode === 'login' ? 'Enter your credentials to access your account.' : 'Start your journey with us today.'}
+                            </p>
+                        </div>
+
+                        <form className='space-y-5' onSubmit={handleSubmit}>
+                            <AnimatePresence mode='wait'>
+                                {mode === 'register' && (
+                                    <motion.div
+                                        key="register-fields"
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: 'auto' }}
+                                        exit={{ opacity: 0, height: 0 }}
+                                        className="space-y-5 overflow-hidden"
+                                    >
+                                        <div className="group">
+                                            <div className="relative">
+                                                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-400 transition-colors" size={20} />
+                                                <input
+                                                    name='full_name'
+                                                    value={form.full_name}
+                                                    onChange={handleChange}
+                                                    className='w-full bg-slate-900/50 border border-slate-700 text-white rounded-xl pl-10 pr-4 py-3 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all placeholder:text-slate-600'
+                                                    placeholder='Full Name'
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="group">
+                                            <div className="relative">
+                                                <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-400 transition-colors" size={20} />
+                                                <input
+                                                    name='username'
+                                                    value={form.username}
+                                                    onChange={handleChange}
+                                                    className='w-full bg-slate-900/50 border border-slate-700 text-white rounded-xl pl-10 pr-4 py-3 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all placeholder:text-slate-600'
+                                                    placeholder='Username'
+                                                />
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+
+                            <div className="group">
+                                <div className="relative">
+                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-400 transition-colors" size={20} />
+                                    <input
+                                        type='email'
+                                        name='email'
+                                        value={form.email}
+                                        onChange={handleChange}
+                                        className='w-full bg-slate-900/50 border border-slate-700 text-white rounded-xl pl-10 pr-4 py-3 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all placeholder:text-slate-600'
+                                        placeholder='Email Address'
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="group">
+                                <div className="relative">
+                                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-400 transition-colors" size={20} />
+                                    <input
+                                        type={showPassword ? 'text' : 'password'}
+                                        name='password'
+                                        value={form.password}
+                                        onChange={handleChange}
+                                        className='w-full bg-slate-900/50 border border-slate-700 text-white rounded-xl pl-10 pr-12 py-3 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all placeholder:text-slate-600'
+                                        placeholder='Password'
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
+                                    >
+                                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                    </button>
+                                </div>
+                            </div>
+
+                            {mode === 'login' && (
+                                <div className='flex justify-end'>
+                                    <a href="#" className='text-sm text-indigo-400 hover:text-indigo-300 transition-colors'>
+                                        Forgot Password?
+                                    </a>
+                                </div>
+                            )}
+
+                            <div className="pt-2">
+                                <Button
+                                    type='submit'
+                                    variant='primary'
+                                    size='lg'
+                                    loading={authLoading}
+                                    className='w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-xl shadow-lg shadow-indigo-500/30 transition-all transform hover:scale-[1.02] active:scale-[0.98]'
+                                >
+                                    <span className="flex items-center justify-center gap-2">
+                                        {mode === 'login' ? 'Sign In' : 'Create Account'}
+                                        {!authLoading && <ArrowRight size={18} />}
+                                    </span>
+                                </Button>
+                            </div>
+                        </form>
+
+                        {/* Toggle Mode */}
+                        <div className='mt-8 pt-6 border-t border-white/10 text-center'>
+                            <p className='text-slate-400'>
+                                {mode === 'login' ? "Don't have an account?" : "Already have an account?"}
+                                <button
+                                    onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
+                                    className='ml-2 text-white font-medium hover:text-indigo-300 underline underline-offset-4 transition-colors'
+                                >
+                                    {mode === 'login' ? 'Sign up' : 'Log in'}
+                                </button>
+                            </p>
+                        </div>
+                    </motion.div>
+                </div>
+            </div>
         </div>
-        {/* right side */}
-        <div className='flex-1 flex items-center justify-center p-6 sm:p-10'>
-            <SignIn/>
-        </div>
-    </div>
-  )
+    )
 }
 
-export default login
+export default Login

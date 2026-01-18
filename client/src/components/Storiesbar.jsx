@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { dummyStoriesData } from '../assets/assets';
+import { dummyStoriesData, DEFAULT_PROFILE_PICTURE } from '../assets/assets';
 import { Plus } from 'lucide-react';
 import moment from 'moment'
 import Storymodel from './Storymodel';
 import StoryViewer from './StoryViewer';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth } from '../context/AuthProvider.jsx';
 import api from '../api/axios';
 import toast from 'react-hot-toast';
 
@@ -14,6 +14,7 @@ const Storiesbar = () => {
 
     const [showModel, setShowModel] = useState(false)
     const [viewStory, setViewStory] = useState(null);
+    const [viewStoryIndex, setViewStoryIndex] = useState(null);
     const [stories, setStories] = useState([]);
 
     const fetchStories = async () => {
@@ -50,9 +51,16 @@ const Storiesbar = () => {
                 </div>
                 {/* Story cards */}
                 {
-                    stories.map((story, index) => (
-                        <div onClick={()=> setViewStory(story)} key={index} className={`relative rounded-lg shadow min-w-30 max-w-30 max-h-40 cursor-pointer hover:shadow-lg transition-all duration-200 bg-gradient-to-b from-indigo-500 to-purple-600 hover:from-indigo-700 hover:to-purple-800 active:scale-95 `}>
-                            <img src={story.user.profile_picture} className='absolute size-8 top-3 left-3 z-10 rounded-full ring ring-gray-100 shadow' alt="" />
+                    stories.map((story, index) => {
+                        // Skip stories with null/invalid user references
+                        if (!story.user) return null
+                        
+                        return (
+                        <div onClick={()=> {
+                            setViewStory(story)
+                            setViewStoryIndex(index)
+                        }} key={index} className={`relative rounded-lg shadow min-w-30 max-w-30 max-h-40 cursor-pointer hover:shadow-lg transition-all duration-200 bg-gradient-to-b from-indigo-500 to-purple-600 hover:from-indigo-700 hover:to-purple-800 active:scale-95 `}>
+                            <img src={story.user.profile_picture || DEFAULT_PROFILE_PICTURE} className='absolute size-8 top-3 left-3 z-10 rounded-full ring ring-gray-100 shadow' alt="" />
                             <p className='absolute top-18 left-3 text-white/60 text-sm truncate max-w-24'>{story.content}</p>
                             <p className='text-white absolute bottom-1 right-2 z-10 text-xs'>{moment(story.createdAt).fromNow()}</p>
                             {
@@ -69,7 +77,8 @@ const Storiesbar = () => {
                             }
 
                         </div>
-                    ))
+                        )
+                    })
                 }
             </div>
 
@@ -77,7 +86,7 @@ const Storiesbar = () => {
                 { showModel && <Storymodel setShowModel={setShowModel} fetchStories={fetchStories} />}
             
             {/* View Story Model */}
-            {viewStory && <StoryViewer viewStory={viewStory} setViewStory={setViewStory} />}
+            {viewStory && <StoryViewer viewStory={viewStory} setViewStory={setViewStory} stories={stories} currentIndex={viewStoryIndex} setViewStoryIndex={setViewStoryIndex} />}
         </div>
     )
 }

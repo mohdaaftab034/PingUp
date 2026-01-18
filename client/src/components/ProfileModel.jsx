@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
-import { dummyUserData } from '../assets/assets'
+import { dummyUserData, DEFAULT_PROFILE_PICTURE } from '../assets/assets'
 import { Pencil } from 'lucide-react';
 import {useDispatch, useSelector} from 'react-redux'
 import { updateUser } from '../features/user/userSlice';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth } from '../context/AuthProvider.jsx';
 import toast from 'react-hot-toast';
 
 const ProfileModel = ({setShowEdit}) => {
@@ -59,7 +59,7 @@ const ProfileModel = ({setShowEdit}) => {
                   Profile Picture
                   <input type="file" hidden accept='image/*' id='profile_picture' className='w-full p-3 border border-gray-200 rounded-lg' onChange={(e)=> setEditForm({...editForm, profile_picture: e.target.files[0]})}/>
                   <div className='group/profile relative'>
-                    <img src={editForm.profile_picture ? URL.createObjectURL(editForm.profile_picture) : user.profile_picture} className='w-24 h-24 rounded-full object-cover mt-2' alt="" />
+                    <img src={editForm.profile_picture ? URL.createObjectURL(editForm.profile_picture) : (user.profile_picture || DEFAULT_PROFILE_PICTURE)} className='w-24 h-24 rounded-full object-cover mt-2' alt="" />
 
                     <div className='absolute hidden group-hover/profile:flex top-0 left-0 right-0 bottom-0 bg-black/30 rounded-full items-center justify-center'>
                       <Pencil className='w-5 h-5 text-white'/>

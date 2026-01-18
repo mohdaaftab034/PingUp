@@ -3,8 +3,10 @@ import sample_cover from './sample_cover.jpg'
 import sample_profile from './sample_profile.jpg'
 import bgImage from './bgImage.png'
 import group_users from './group_users.png'
-import { Home, MessageCircle, Search, UserIcon, Users } from 'lucide-react'
+import { Home, MessageCircle, Search, UserIcon, Users, Film } from 'lucide-react'
 import sponsored_img from './sponsored_img.png'
+
+export const DEFAULT_PROFILE_PICTURE = 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'
 
 export const assets = {
     logo,
@@ -17,6 +19,7 @@ export const assets = {
 
 export const menuItemsData = [
     { to: '/', label: 'Feed', Icon: Home },
+    { to: '/reels', label: 'Reels', Icon: Film },
     { to: '/messages', label: 'Messages', Icon: MessageCircle },
     { to: '/connections', label: 'Connections', Icon: Users },
     { to: '/discover', label: 'Discover', Icon: Search },

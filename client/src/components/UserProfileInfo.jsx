@@ -1,6 +1,7 @@
 import { Calendar, MapPin, PenBox, Verified } from 'lucide-react'
 import moment from 'moment'
 import React from 'react'
+import { DEFAULT_PROFILE_PICTURE } from '../assets/assets'
 
 const UserProfileInfo = ({user, posts, profileId, setShowEdit}) => {
   return (
@@ -8,7 +9,7 @@ const UserProfileInfo = ({user, posts, profileId, setShowEdit}) => {
         <div className='flex flex-col md:flex-row items-start gap-6'>
 
             <div className='w-32 h-32 border-4 border-white shadow-lg absolute -top-16 rounded-full'>
-                <img src={user.profile_picture} className='absolute rounded-full z-2 w-full h-full' alt="" />
+                <img src={user.profile_picture || DEFAULT_PROFILE_PICTURE} className='absolute rounded-full z-2 w-full h-full' alt="" />
             </div>
 
             <div className='w-full pt-16 md:pt-0 md:pl-36'>
@@ -46,11 +47,11 @@ const UserProfileInfo = ({user, posts, profileId, setShowEdit}) => {
                         <span className='text-xs sm:text-sm text-gray-500 ml-1'>Posts</span>
                     </div>
                     <div>
-                        <span className='sm:text-xl font-bold text-gray-900'>{posts.followers?.length || 0}</span>
+                        <span className='sm:text-xl font-bold text-gray-900'>{user.followers?.length || 0}</span>
                         <span className='text-xs sm:text-sm text-gray-500 ml-1'>Followers</span>
                     </div>
                     <div>
-                        <span className='sm:text-xl font-bold text-gray-900'>{posts.following?.length || 0}</span>
+                        <span className='sm:text-xl font-bold text-gray-900'>{user.following?.length || 0}</span>
                         <span className='text-xs sm:text-sm text-gray-500 ml-1'>Following</span>
                     </div>
                 </div>

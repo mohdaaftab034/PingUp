@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { ArrowLeft, Sparkle, TextIcon, Upload } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { useAuth } from '@clerk/clerk-react'
+import { useAuth } from '../context/AuthProvider.jsx'
 import api from '../api/axios'
 
 const Storymodel = ({setShowModel, fetchStories}) => {

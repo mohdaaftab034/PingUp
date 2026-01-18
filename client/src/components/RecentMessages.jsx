@@ -1,16 +1,15 @@
 import React, { useEffect, useState } from 'react'
-import { dummyRecentMessagesData } from '../assets/assets';
+import { dummyRecentMessagesData, DEFAULT_PROFILE_PICTURE } from '../assets/assets';
 import { Link } from 'react-router-dom';
 import moment from 'moment';
-import { useAuth, useUser } from '@clerk/clerk-react';
+import { useAuth } from '../context/AuthProvider.jsx';
 import api from '../api/axios';
 import {toast} from 'react-hot-toast'
 
 const RecentMessages = () => {
 
     const [messages, setMessages] = useState([]);
-    const {user} = useUser()
-    const {getToken} = useAuth()
+    const {user, getToken} = useAuth()
 
     const fetchRecentMessages = async () => {
         try {
@@ -45,9 +44,9 @@ const RecentMessages = () => {
     useEffect(()=> {
         if(user){
             fetchRecentMessages()
-            setInterval(fetchRecentMessages, 30000)
+            const intervalId = setInterval(fetchRecentMessages, 30000)
             return ()=> {
-                clearInterval()
+                clearInterval(intervalId)
             }
         }
     }, [user])
@@ -59,7 +58,7 @@ const RecentMessages = () => {
                 {
                     messages.map((message, index) => (
                         <Link to={`/messages/${message.from_user_id._id}`} key={index} className='flex items-start gap-2 py-2 hover:bg-slate-100'>
-                            <img src={message.from_user_id.profile_picture} className='w-8 h-8 rounded-full' alt="" />
+                            <img src={message.from_user_id.profile_picture || DEFAULT_PROFILE_PICTURE} className='w-8 h-8 rounded-full' alt="" />
                             <div className='w-full'>
                                 <div className='flex justify-between'>
                                     <p className='font-medium'>{message.from_user_id.full_name}</p>

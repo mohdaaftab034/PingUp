@@ -1,11 +1,13 @@
 import React, { useState } from 'react'
-import { dummyUserData } from '../assets/assets'
+import { dummyUserData, DEFAULT_PROFILE_PICTURE } from '../assets/assets'
 import { Image, X } from 'lucide-react'
 import toast from 'react-hot-toast'
 import {useSelector} from 'react-redux'
-import { useAuth } from '@clerk/clerk-react'
+import { useAuth } from '../context/AuthProvider.jsx'
 import api from '../api/axios'
 import { useNavigate } from 'react-router-dom'
+import Button from '../components/Button'
+import { useButtonLoader } from '../hooks/useButtonLoader'
 
 const CreatePost = () => {
 
@@ -13,16 +15,14 @@ const CreatePost = () => {
 
   const [content, setContent] = useState('')
   const [images, setImages] = useState([])
-  const [loading, setLoading] = useState(false)
 
   const user = useSelector((state)=> state.user.value);
   const {getToken} = useAuth()
-  const handleSubmit = async () => {
+  
+  const handlePostSubmit = async () => {
     if(!images.length && !content){
-      return toast.error("Please add at least one image or text")
+      throw new Error("Please add at least one image or text")
     }
-
-    setLoading(true)
 
     const postType = images.length && content ? 'text_with_image' : images.length ? 'image' : 'text'
 
@@ -38,17 +38,23 @@ const CreatePost = () => {
         Authorization: `Bearer ${await getToken()}`
       }})
       if(data.success){
+        toast.success('Post published successfully!')
         navigate('/')
       } else{
-        console.log(data.message)
-          throw new Error(data.message)
+        throw new Error(data.message)
       }
     } catch (error) {
-      console.log(error.message)
       throw new Error(error.message)
     }
-    setLoading(false)
   }
+
+  const { loading, handleClick: handlePublish } = useButtonLoader(
+    handlePostSubmit,
+    {
+      minDuration: 800,
+      onError: (error) => toast.error(error.message)
+    }
+  )
 
   return (
     <div className='min-h-screen bg-gradient-to-b from-slate-50 to-white '>
@@ -63,7 +69,7 @@ const CreatePost = () => {
         <div className="max-w-xl bg-white p-4 sm:p-8 sm:pb-3 rounded-xl shadow-md space-y-4">
           {/* Header */}
           <div className='flex items-center gap-3'>
-            <img src={user.profile_picture} className='w-12 h-12 rounded-full shadow' alt="" />
+            <img src={user.profile_picture || DEFAULT_PROFILE_PICTURE} className='w-12 h-12 rounded-full shadow' alt="" />
             <div>
               <h2 className='font-semibold'>{user.full_name}</h2>
               <p className='text-sm text-gray-500'>@{user.username}</p>
@@ -89,18 +95,20 @@ const CreatePost = () => {
           {/* Bottom bar  */}
           <div className='flex items-center justify-between pt-3 border-t border-gray-300'>
             <label htmlFor="images" className='flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 transition cursor-pointer'>
-              <Image className='size-6' />
+              <Image className={`size-6 ${loading ? 'opacity-50' : ''}`} />
             </label>
 
-            <input type="file" name="" id="images" accept='image/*' hidden multiple onChange={(e) => setImages([...images, ...Array.from(e.target.files)])} />
+            <input type="file" name="" id="images" accept='image/*' hidden multiple onChange={(e) => setImages([...images, ...Array.from(e.target.files)])} disabled={loading} />
 
-            <button disabled={loading} onClick={()=> toast.promise(handleSubmit(), {
-              loading : 'uploading...',
-              success : <p>Post Added</p>,
-              error : <p>Post not Added</p>
-            })} className='text-sm bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 active:scale-95 transition text-white font-medium px-8 py-2 rounded-md cursor-pointer'>
+            <Button
+              variant='primary'
+              size='md'
+              loading={loading}
+              onClick={handlePublish}
+              disabled={!images.length && !content}
+            >
               Publish Post
-            </button>
+            </Button>
           </div>
         </div>
       </div>

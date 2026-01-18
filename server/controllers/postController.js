@@ -2,17 +2,18 @@ import fs from 'fs'
 import imagekit from '../configs/imageKit.js'
 import Post from '../models/postModel.js'
 import User from '../models/userModel.js'
+import { inngest } from '../inngest/index.js'
 
 //add a post
-export const addPost = async (req , res)=> {
+export const addPost = async (req, res) => {
     try {
-        const {userId} =req.auth()
-        const {content, post_type} = req.body
+        const userId = req.userId
+        const { content, post_type } = req.body
         const images = req.files
 
         let image_urls = []
 
-        if(images.length){
+        if (images.length) {
             image_urls = await Promise.all(
                 images.map(async (image) => {
                     const fileBuffer = fs.readFileSync(image.path)
@@ -25,9 +26,9 @@ export const addPost = async (req , res)=> {
                     const url = imagekit.url({
                         path: response.filePath,
                         transformation: [
-                            {quality: 'auto'},
-                            {format: 'webp'},
-                            {width: '1280'}
+                            { quality: 'auto' },
+                            { format: 'webp' },
+                            { width: '1280' }
                         ]
                     })
                     return url
@@ -42,53 +43,100 @@ export const addPost = async (req , res)=> {
             post_type
         })
 
-        res.json({success: true, message: "Post created successfully"})
+        res.json({ success: true, message: "Post created successfully" })
 
     } catch (error) {
         console.log(error)
-        res.json({ success: false, message: error.message})
+        res.json({ success: false, message: error.message })
     }
 }
 
 //Get Post
-export const getFeedPost = async (req, res)=> {
+export const getFeedPost = async (req, res) => {
     try {
-        const {userId} = req.auth()
-        const user = await User.findById(userId)
+        const userId = req.userId
+        const posts = await Post.find({})
+            .populate('user')
+            .populate('comment.user', 'username full_name profile_picture')
+            .sort({ createdAt: -1 })
+        
+        // Filter out posts with null/invalid user references
+        const validPosts = posts.filter(post => post.user !== null)
 
-        //User connections and following
-        const userIds = [userId, ...user.connections, ...user.following]
-        const posts = await Post.find({user: {$in: userIds}}).populate('user').sort({createdAt: -1})
-
-        res.json({success: true, posts})
+        res.json({ success: true, posts: validPosts })
 
 
     } catch (error) {
         console.log(error)
-        res.json({ success: false, message: error.message})
+        res.json({ success: false, message: error.message })
     }
 }
 
 //like Post (8:24)
-export const likePost = async (req, res)=> {
+export const likePost = async (req, res) => {
     try {
-        const {userId} = req.auth()
-        const {postId} = req.body
+        const userId = req.userId
+        const { postId } = req.body
 
         const post = await Post.findById(postId)
 
-        if(post.likes_count.includes(userId)){
-            post.likes_count = post.likes_count.filter(user=> user !== userId)
+        const alreadyLiked = post.likes_count.some(likeId => likeId.toString() === userId)
+
+        if (alreadyLiked) {
+            post.likes_count = post.likes_count.filter(user => user.toString() !== userId)
             await post.save();
-            res.json({success: true, message: 'Post unliked'})
+            res.json({ success: true, message: 'Post unliked' })
         } else {
             post.likes_count.push(userId)
             await post.save()
-            res.json({success: true, message: "Post liked"})
+            res.json({ success: true, message: "Post liked" })
         }
 
     } catch (error) {
         console.log(error)
-        res.json({ success: false, message: error.message})
+        res.json({ success: false, message: error.message })
     }
 }
+
+//comment post // your inngest client instance
+
+export const addComment = async (req, res) => {
+    try {
+        const userId = req.userId
+        const { postId, content } = req.body
+        if (!content) {
+            return res.json({ success: false, message: "Comment content is required" });
+        }
+
+        // Add comment in DB
+        const post = await Post.findByIdAndUpdate(
+            postId,
+            { $push: { comment: { content, user: userId, createdAt: new Date() } } },
+            { new: true }
+        ).populate('comment.user', 'username full_name profile_picture');
+
+        if (!post) {
+            return res.json({ success: false, message: "Post not found" });
+        }
+
+        const newComment = post.comment[post.comment.length - 1];
+
+        // 🔥 Fire Inngest event to notify SSE
+        await inngest.send({
+            name: "post/comment.added",
+            data: {
+                postId,
+                comment: {
+                    id: newComment._id,
+                    content: newComment.content,
+                    user: newComment.user,
+                },
+            },
+        });
+
+        res.json({ success: true, message: "Comment added", post });
+    } catch (error) {
+        console.error("Error adding comment:", error);
+        res.json({ success: false, message: "Internal server error" });
+    }
+};

@@ -9,7 +9,7 @@ import User from "../models/userModel.js";
 //Get User data using userId
 export const getUserData = async (req, res) => {
     try {
-        const { userId } = req.auth();
+        const userId = req.userId
         const user = await User.findById(userId)
         if (!user) {
             return res.json({ success: false, message: "User not found" })
@@ -24,7 +24,7 @@ export const getUserData = async (req, res) => {
 //Update userData
 export const updateUserData = async (req, res) => {
     try {
-        const { userId } = req.auth();
+        const userId = req.userId
         let { username, bio, location, full_name } = req.body;
 
         const tempUser = await User.findById(userId)
@@ -97,8 +97,12 @@ export const updateUserData = async (req, res) => {
 //Find Users using username, email, location, name
 export const discoverUsers = async (req, res) => {
     try {
-        const { userId } = req.auth();
+        const userId = req.userId
         const { input } = req.body;
+
+        if (!userId) {
+            return res.json({ success: false, message: "User not authenticated" })
+        }
 
         const allUsers = await User.find(
             {
@@ -110,8 +114,29 @@ export const discoverUsers = async (req, res) => {
                 ]
             }
         )
-        const filteredUsers = allUsers.filter(user => user._id !== userId)
+        const filteredUsers = allUsers.filter(user => user._id.toString() !== userId.toString())
         res.json({ success: true, users: filteredUsers })
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: error.message })
+    }
+}
+
+// Get recently created users
+export const getRecentUsers = async (req, res) => {
+    try {
+        const userId = req.userId
+
+        if (!userId) {
+            return res.json({ success: false, message: "User not authenticated" })
+        }
+
+        // Fetch 12 most recently created users, excluding the current user
+        const recentUsers = await User.find({ _id: { $ne: userId } })
+            .sort({ createdAt: -1 })
+            .limit(12)
+
+        res.json({ success: true, users: recentUsers })
     } catch (error) {
         console.log(error);
         res.json({ success: false, message: error.message })
@@ -121,12 +146,12 @@ export const discoverUsers = async (req, res) => {
 //Follow user
 export const followUser = async (req, res) => {
     try {
-        const { userId } = req.auth();
+        const userId = req.userId
         const { id } = req.body;
 
         const user = await User.findById(userId)
 
-        if (user.following.includes(id)) {
+        if (user.following.some(followingId => followingId.toString() === id)) {
             return res.json({ success: false, message: 'You are already following' })
         }
 
@@ -149,15 +174,15 @@ export const followUser = async (req, res) => {
 //Unfollow user
 export const unfollowUser = async (req, res) => {
     try {
-        const { userId } = req.auth();
+        const userId = req.userId
         const { id } = req.body;
 
         const user = await User.findById(userId)
-        user.following = user.following.filter(user => user !== id)
+        user.following = user.following.filter(user => user.toString() !== id)
         await user.save()
 
         const toUser = await User.findById(id)
-        user.followers = user.followers.filter(user => user !== userId)
+        toUser.followers = toUser.followers.filter(followerId => followerId.toString() !== userId)
         await toUser.save()
 
         res.json({ success: true, message: 'You are no longer follwing this user' })
@@ -171,12 +196,12 @@ export const unfollowUser = async (req, res) => {
 //send connection requests  (7:38)
 export const sendConnectionRequest = async (req, res) => {
     try {
-        const { userId } = req.auth()
+        const userId = req.userId
         const { id } = req.body
 
         //Check if user has sent more then 20 request in the last 24 hours
         const last24Hours = new Date(Date.now() - 24 * 60 * 60 * 1000)
-        const connectionRequest = await Connection.find({ from_user_id: userId, created_at: { $gt: last24Hours } })
+        const connectionRequest = await Connection.find({ from_user_id: userId, createdAt: { $gt: last24Hours } })
         if (connectionRequest.length >= 20) {
             return res.json({ success: false, message: "You have sent the more than 20 requests in the last 24 hours" })
         }
@@ -214,7 +239,7 @@ export const sendConnectionRequest = async (req, res) => {
 //Get user Connection (7:40)
 export const getUserConnection = async (req, res) => {
     try {
-        const { userId } = req.auth()
+        const userId = req.userId
         const user = await User.findById(userId).populate('connections followers following')
         
         const connections = user.connections
@@ -234,7 +259,7 @@ export const getUserConnection = async (req, res) => {
 //Accept the conncetion (7:42)
 export const acceptConnectionRequest = async (req, res) => {
     try {
-        const { userId } = req.auth()
+        const userId = req.userId
         const { id } = req.body;
 
         const connection = await Connection.findOne({ from_user_id: id, to_user_id: userId })
@@ -274,10 +299,34 @@ export const getUserProfiles = async (req, res) => {
             res.json({success: false, message: "Profile not found"})
         }
 
-        const posts = await Post.find({user: profileId}).populate('user')
+        const posts = await Post.find({ user: profileId })
+            .populate('user')
+            .populate('comment.user', 'username full_name profile_picture')
 
         res.json({success: true, profile, posts})
         
+    } catch (error) {
+        console.log(error)
+        return res.json({ success: false, message: error.message })
+    }
+}
+
+//Get pending connection notifications
+export const getPendingNotifications = async (req, res) => {
+    try {
+        const userId = req.userId
+        
+        if (!userId) {
+            return res.json({ success: false, message: "User not authenticated" })
+        }
+
+        const pendingConnections = await Connection.find({ 
+            to_user_id: userId, 
+            status: 'pending' 
+        }).populate('from_user_id')
+
+        res.json({ success: true, notifications: pendingConnections })
+
     } catch (error) {
         console.log(error)
         return res.json({ success: false, message: error.message })
