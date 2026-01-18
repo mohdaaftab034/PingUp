@@ -13,10 +13,11 @@ import reelRouter from './routes/reelRoutes.js'
 
 const app = express()
 
-await connectDB()
-
 app.use(express.json())
-app.use(cors())
+app.use(cors({
+    origin: process.env.FRONTEND_URL || '*',
+    credentials: true
+}))
 
 app.get('/', (req, res) => res.send('server is running...'))
 app.use('/api/inngest', serve({ client: inngest, functions }))
@@ -29,4 +30,21 @@ app.use('/api/reel', reelRouter)
 
 const PORT = process.env.PORT || 4000
 
-app.listen(PORT, () => console.log(`Server running on Port ${PORT}`))
+// Initialize database and start server
+const startServer = async () => {
+    try {
+        await connectDB()
+        app.listen(PORT, () => console.log(`Server running on Port ${PORT}`))
+    } catch (error) {
+        console.error('Failed to start server:', error)
+        process.exit(1)
+    }
+}
+
+// Start server only if not in serverless environment
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+    startServer()
+}
+
+// Export for serverless (Vercel)
+export default app
