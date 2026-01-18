@@ -1,5 +1,5 @@
-import app from './server.js'
-import connectDB from './configs/db.js'
+import app from '../server.js'
+import connectDB from '../configs/db.js'
 
 // Initialize database connection for serverless
 let isConnected = false
