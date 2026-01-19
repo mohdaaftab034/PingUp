@@ -1,5 +1,5 @@
 import { BadgeCheck, X, Heart, Eye } from 'lucide-react'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { DEFAULT_PROFILE_PICTURE } from '../assets/assets'
@@ -18,6 +18,63 @@ const StoryViewer = ({ viewStory, setViewStory, stories = [], currentIndex = 0, 
     const [views, setViews] = useState(viewStory?.views_count?.length || 0);
     const [showViewers, setShowViewers] = useState(false);
     const [viewers, setViewers] = useState([]);
+    const storyVideoRef = useRef(null);
+
+    // Pause all videos in the feed when story viewer is open
+    useEffect(() => {
+        const allVideos = document.querySelectorAll('video')
+        const videosToMute = []
+        
+        allVideos.forEach(video => {
+            // Don't pause the story video itself
+            if (!video.closest('.story-viewer-video')) {
+                video.pause()
+                videosToMute.push(video)
+            }
+        })
+
+        // Resume videos when story viewer is closed and stop story video
+        return () => {
+            // Stop all story viewer videos (including ref and any in DOM)
+            const storyVideos = document.querySelectorAll('.story-viewer-video')
+            storyVideos.forEach(video => {
+                video.pause()
+                video.currentTime = 0
+                video.src = ''
+                video.load()
+            })
+            
+            // Also stop via ref
+            if (storyVideoRef.current) {
+                storyVideoRef.current.pause()
+                storyVideoRef.current.currentTime = 0
+                storyVideoRef.current.src = ''
+                storyVideoRef.current.load()
+            }
+            
+            // Resume feed videos after a small delay to ensure story is gone
+            setTimeout(() => {
+                videosToMute.forEach(video => {
+                    // Check if video is visible using Intersection Observer state
+                    const rect = video.getBoundingClientRect()
+                    const isVisible = rect.top >= 0 && rect.bottom <= window.innerHeight
+                    if (isVisible) {
+                        video.play().catch(err => console.log('Resume error:', err))
+                    }
+                })
+            }, 100)
+        }
+    }, [])
+
+    // Stop video when story changes or component unmounts
+    useEffect(() => {
+        return () => {
+            if (storyVideoRef.current) {
+                storyVideoRef.current.pause()
+                storyVideoRef.current.currentTime = 0
+            }
+        }
+    }, [viewStory])
 
     useEffect(() => {
         // Add view to story
@@ -42,10 +99,32 @@ const StoryViewer = ({ viewStory, setViewStory, stories = [], currentIndex = 0, 
     }, [viewStory, getToken, currentUser])
 
     const handleClose = () => {
+        // Stop all story videos immediately
+        const storyVideos = document.querySelectorAll('.story-viewer-video')
+        storyVideos.forEach(video => {
+            video.pause()
+            video.currentTime = 0
+            video.src = ''
+            video.load()
+        })
+        
+        if (storyVideoRef.current) {
+            storyVideoRef.current.pause()
+            storyVideoRef.current.currentTime = 0
+            storyVideoRef.current.src = ''
+            storyVideoRef.current.load()
+        }
+        
         setViewStory(null)
     }
 
     const handleNext = React.useCallback(() => {
+        // Stop current video before switching
+        if (storyVideoRef.current) {
+            storyVideoRef.current.pause()
+            storyVideoRef.current.currentTime = 0
+        }
+        
         if (stories.length > 0 && currentIndex < stories.length - 1) {
             let nextIndex = currentIndex + 1
             setViewStoryIndex(nextIndex)
@@ -66,6 +145,12 @@ const StoryViewer = ({ viewStory, setViewStory, stories = [], currentIndex = 0, 
     }, [stories, currentIndex, setViewStoryIndex, setViewStory])
 
     const handlePrev = () => {
+        // Stop current video before switching
+        if (storyVideoRef.current) {
+            storyVideoRef.current.pause()
+            storyVideoRef.current.currentTime = 0
+        }
+        
         if (currentIndex > 0) {
             const prevIndex = currentIndex - 1
             setViewStoryIndex(prevIndex)
@@ -120,6 +205,12 @@ const StoryViewer = ({ viewStory, setViewStory, stories = [], currentIndex = 0, 
     }
 
     const fetchViewers = async () => {
+        // Only allow story owner to view viewers
+        if (viewStory.user._id !== currentUser._id) {
+            toast.error('Only the story owner can view the list of viewers')
+            return
+        }
+
         try {
             const token = await getToken()
             const { data } = await api.get(`/api/story/viewers/${viewStory._id}`,
@@ -129,6 +220,8 @@ const StoryViewer = ({ viewStory, setViewStory, stories = [], currentIndex = 0, 
             if (data.success) {
                 setViewers(data.viewers)
                 setShowViewers(true)
+            } else {
+                toast.error(data.message)
             }
         } catch (error) {
             toast.error('Failed to load viewers')
@@ -142,11 +235,11 @@ const StoryViewer = ({ viewStory, setViewStory, stories = [], currentIndex = 0, 
         switch (viewStory.media_type) {
             case 'image':
                 return (
-                    <img src={viewStory.media_url} className='max-w-full max-h-[90vh] object-contain' alt="" />
+                    <img src={viewStory.media_url} className='sm:max-w-full sm:max-h-[90vh] sm:object-contain w-full h-full object-cover sm:object-contain' alt="" />
                 );
             case 'video':
                 return (
-                    <video src={viewStory.media_url} className='w-full h-auto max-h-[90vh] object-contain' autoPlay muted />
+                    <video ref={storyVideoRef} src={viewStory.media_url} className='story-viewer-video sm:w-full sm:h-auto sm:max-h-[90vh] sm:object-contain w-full h-full object-cover sm:object-contain' autoPlay loop />
                 );
             case 'text':
                 return (
@@ -188,7 +281,7 @@ const StoryViewer = ({ viewStory, setViewStory, stories = [], currentIndex = 0, 
                     <Heart className={`w-6 h-6 ${isLiked ? 'fill-red-500 text-red-500' : ''}`} />
                     <span className='text-sm font-medium'>{likes}</span>
                 </div>
-                <div onClick={fetchViewers} className='flex items-center gap-2 text-white cursor-pointer hover:text-blue-400 transition'>
+                <div onClick={fetchViewers} className={`flex items-center gap-2 cursor-pointer transition ${viewStory.user._id === currentUser._id ? 'text-white hover:text-blue-400' : 'text-gray-500 cursor-not-allowed hover:text-gray-600'}`}>
                     <Eye className='w-6 h-6' />
                     <span className='text-sm font-medium'>{views}</span>
                 </div>
@@ -221,7 +314,7 @@ const StoryViewer = ({ viewStory, setViewStory, stories = [], currentIndex = 0, 
             )}
 
             {/* Content Wrapper with Navigation */}
-            <div className='max-w-[90vw] max-h-[90vh] flex items-center justify-center relative'>
+            <div className='max-w-[90vw] max-h-[90vh] sm:max-w-[90vw] sm:max-h-[90vh] w-full h-full sm:w-auto sm:h-auto flex items-center justify-center relative'>
                 {/* Left clickable area */}
                 <div onClick={handlePrev} className='absolute left-0 top-0 h-full w-1/4 cursor-pointer z-10 hover:bg-white/5 transition' />
                 
@@ -229,7 +322,7 @@ const StoryViewer = ({ viewStory, setViewStory, stories = [], currentIndex = 0, 
                 <div onClick={handleNext} className='absolute right-0 top-0 h-full w-1/4 cursor-pointer z-10 hover:bg-white/5 transition' />
 
                 {/* Center content */}
-                <div className='flex items-center justify-center'>
+                <div className='flex items-center justify-center w-full h-full'>
                     {renderContent()}
                 </div>
 

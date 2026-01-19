@@ -82,6 +82,7 @@ const App = () => {
           <Route path='/' element={ !user ? <Login/> : <Layout/>}>
               <Route index element={<Feed/>} />
               <Route path='reels' element={<Reels/>} />
+              <Route path='reels/:reelId' element={<Reels/>} />
               <Route path='messages' element={<Messages/>} />
               <Route path='messages/:userId' element={<ChatBox/>} />
               <Route path='connections' element={<Connection/>} />

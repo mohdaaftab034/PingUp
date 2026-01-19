@@ -21,7 +21,7 @@ const Layout = () => {
   const { getToken } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const isReelsPage = location.pathname === '/reels'
+  const isReelsPage = location.pathname === '/reels' || location.pathname.startsWith('/reels/')
 
   // Poll for new connection request notifications
   useEffect(() => {
@@ -65,26 +65,41 @@ const Layout = () => {
     }
   }, [user, getToken])
 
+  // Handle page navigation to pause all videos
+  useEffect(() => {
+    const pauseAllVideos = () => {
+      const allVideos = document.querySelectorAll('video')
+      allVideos.forEach(video => {
+        video.muted = true
+        video.pause()
+        video.currentTime = 0
+      })
+    }
+
+    // Pause videos when location changes
+    pauseAllVideos()
+  }, [location.pathname])
+
   return user ? (
-    <div className='w-full flex h-screen'>
+    <div className='w-screen h-screen flex flex-col sm:flex-row overflow-hidden'>
       {!isReelsPage && <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />}
-      <div className='flex-1 bg-slate-50 relative'>
+      <div className='flex-1 bg-slate-50 relative flex flex-col overflow-hidden'>
         {/* Top Navbar for Mobile */}
         {!isReelsPage && (
-          <div className='sm:hidden fixed top-0 left-0 right-0 z-30 bg-white border-b border-gray-200 flex items-center justify-between px-4 py-3 shadow'>
+          <div className='sm:hidden fixed top-0 left-0 right-0 z-30 bg-white border-b border-gray-200 flex items-center justify-between px-3 py-2.5 shadow'>
             <img
               src={assets.logo}
               alt='PingUp logo'
-              className='h-8 object-contain cursor-pointer'
+              className='h-7 object-contain cursor-pointer'
               onClick={() => navigate('/')}
             />
             <div className='flex items-center gap-2'>
               <MessageCircle 
-                className='p-2 bg-slate-100 rounded-md shadow w-10 h-10 text-gray-600 cursor-pointer' 
+                className='p-1.5 bg-slate-100 rounded-md shadow w-8 h-8 text-gray-600 cursor-pointer text-sm' 
                 onClick={() => navigate('/messages')} 
               />
               <button 
-                className='flex items-center gap-1 px-3 py-2 bg-slate-100 rounded-md shadow text-gray-700 text-sm'
+                className='flex items-center gap-1 px-2.5 py-1.5 bg-white border border-gray-300 rounded-md shadow text-gray-700 hover:border-indigo-500 hover:bg-indigo-50 text-xs transition'
                 onClick={() => setShowUploadOptions(true)}
               >
                 <Plus className='w-4 h-4' />
@@ -97,27 +112,27 @@ const Layout = () => {
         {/* Bottom Navbar for Mobile */}
         {!isReelsPage && (
           <div className='sm:hidden fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-gray-200 shadow-lg'>
-            <div className='flex items-center justify-around py-2'>
+            <div className='flex items-center justify-around py-1.5'>
               <NavLink to='/' end className={({isActive}) => `flex flex-col items-center p-2 ${isActive ? 'text-indigo-600' : 'text-gray-600'}`}>
-                <Home className='w-6 h-6' />
+                <Home className='w-5 h-5' />
               </NavLink>
               <NavLink to='/reels' className={({isActive}) => `flex flex-col items-center p-2 ${isActive ? 'text-indigo-600' : 'text-gray-600'}`}>
-                <Film className='w-6 h-6' />
+                <Film className='w-5 h-5' />
               </NavLink>
             <NavLink to='/connections' className={({isActive}) => `flex flex-col items-center p-2 ${isActive ? 'text-indigo-600' : 'text-gray-600'}`}>
-              <Users className='w-6 h-6' />
+              <Users className='w-5 h-5' />
             </NavLink>
             <NavLink to='/discover' className={({isActive}) => `flex flex-col items-center p-2 ${isActive ? 'text-indigo-600' : 'text-gray-600'}`}>
-              <Search className='w-6 h-6' />
+              <Search className='w-5 h-5' />
             </NavLink>
             <NavLink to='/profile' className={({isActive}) => `flex flex-col items-center p-2 ${isActive ? 'text-indigo-600' : 'text-gray-600'}`}>
-              <UserIcon className='w-6 h-6' />
+              <UserIcon className='w-5 h-5' />
             </NavLink>
           </div>
         </div>
         )}
 
-        <div className={`h-full overflow-y-auto ${isReelsPage ? '' : 'sm:pt-0 pt-14 sm:pb-0 pb-16'}`}>
+        <div className={`flex-1 overflow-y-auto ${isReelsPage ? '' : 'sm:pt-0 pt-12 sm:pb-0 pb-16'}`}>
           <Outlet/>
         </div>
 

@@ -3,6 +3,7 @@ import { assets, dummyPostsData } from '../assets/assets'
 import Loading from '../components/Loading'
 import Storiesbar from '../components/Storiesbar'
 import PostCard from '../components/PostCard'
+import ReelCard from '../components/ReelCard'
 import RecentMessages from '../components/RecentMessages'
 import { useAuth } from '../context/AuthProvider.jsx'
 import api from '../api/axios'
@@ -17,14 +18,31 @@ const Feed = () => {
   const fetchFeeds = async () => {
     try {
       setLoading(true)
-      const {data} = await api.get('/api/post/feed', {headers: {
-        Authorization: `Bearer ${await getToken()}`
-      }})
+      const token = await getToken()
+      
+      // Fetch posts
+      const { data: postsData } = await api.get('/api/post/feed', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
 
-      if(data.success){
-        setFeeds(data.posts)
-      } else{
-        toast.error(data.message)
+      // Fetch reels
+      const { data: reelsData } = await api.get('/api/reel/get', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+
+      if (postsData.success && reelsData.success) {
+        // Combine posts and reels with type field
+        const postsWithType = (postsData.posts || []).map(post => ({ ...post, type: 'post' }))
+        const reelsWithType = (reelsData.reels || []).map(reel => ({ ...reel, type: 'reel' }))
+        
+        // Merge and sort by creation date (newest first)
+        const combined = [...postsWithType, ...reelsWithType].sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        )
+        setFeeds(combined)
+      } else {
+        if (!postsData.success) toast.error(postsData.message)
+        if (!reelsData.success) toast.error(reelsData.message)
       }
     } catch (error) {
       toast.error(error.message)
@@ -34,19 +52,33 @@ const Feed = () => {
 
   useEffect(() => {
     fetchFeeds()
+
+    // Cleanup function to pause all videos when leaving the page
+    return () => {
+      const allVideos = document.querySelectorAll('video')
+      allVideos.forEach(video => {
+        video.muted = true
+        video.pause()
+        video.currentTime = 0
+      })
+    }
   }, [])
 
   return (
-    <div className='h-full overflow-y-scroll no-scrollbar py-10 flex items-start justify-center gap-8'>
+    <div className='h-full overflow-y-scroll no-scrollbar py-4 sm:py-6 lg:py-10 flex items-start justify-center gap-4 sm:gap-6 lg:gap-8'>
       {/* stories and post list */}
-      <div className='w-full max-w-2xl'>
+      <div className='w-full max-w-2xl px-3 sm:px-4'>
         {!loading && <Storiesbar/>}
-        <div className='p-4 space-y-6'>
+        <div className='p-2 sm:p-4 space-y-4 sm:space-y-6'>
           {!loading ? (
             feeds.length > 0 ? (
-              feeds.map((post)=> (
-                <PostCard key={post._id} post={post}/>
-              ))
+              feeds.map((item) => {
+                if (item.type === 'reel') {
+                  return <ReelCard key={item._id} reel={item} />
+                } else {
+                  return <PostCard key={item._id} post={item} />
+                }
+              })
             ) : (
               <div className='text-center py-10'>
                 <p className='text-gray-500 text-lg'>No posts yet. Start following people to see their posts!</p>

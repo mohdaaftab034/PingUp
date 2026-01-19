@@ -91,26 +91,26 @@ const ChatBox = () => {
   }, [messages])
 
   return user ? (
-    <div className='flex flex-col h-screen overflow-hidden max-sm:fixed max-sm:inset-0 max-sm:bg-white max-sm:pt-14 max-sm:pb-20 overflow-x-hidden'>
-      <div className='flex items-center gap-2 p-2 md:px-10 xl:pl-24 bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-gray-300'>
+    <div className='flex flex-col h-screen overflow-hidden max-sm:fixed max-sm:inset-0 max-sm:bg-white max-sm:pt-14 max-sm:pb-20'>
+      <div className='flex items-center gap-2 p-2 sm:p-3 md:px-6 lg:px-10 xl:pl-24 bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-gray-300'>
         <img src={user.profile_picture || DEFAULT_PROFILE_PICTURE} className='size-8 rounded-full' alt="" />
-        <div>
-          <p className='font-medium'>{user.full_name}</p>
-          <p className='text-sm text-gray-500 -mt-1.5'>@{user.username}</p>
+        <div className='min-w-0'>
+          <p className='font-medium text-sm sm:text-base truncate'>{user.full_name}</p>
+          <p className='text-xs sm:text-sm text-gray-500 -mt-1'>@{user.username}</p>
         </div>
       </div>
-      <div className='flex-1 overflow-y-auto overflow-x-hidden p-5 md:px-10'>
-        <div className='space-y-4 max-w-4xl mx-auto w-full'>
+      <div className='flex-1 overflow-y-auto overflow-x-hidden p-2 sm:p-3 md:p-5 md:px-6 lg:px-10'>
+        <div className='space-y-3 sm:space-y-4 max-w-4xl mx-auto w-full'>
           {loading ? (
             // Skeleton loaders for messages
             Array(5).fill(0).map((_, i) => (
               <div key={i} className={`flex flex-col ${i % 2 === 0 ? 'items-end' : 'items-start'}`}>
                 <div className={`p-3 max-w-sm rounded-lg animate-pulse ${
                   i % 2 === 0 
-                    ? 'bg-gray-300 rounded-br-none w-32 h-10' 
-                    : 'bg-gray-200 rounded-bl-none w-40 h-10'
+                    ? 'bg-gray-300 rounded-br-none w-24 sm:w-32 h-10' 
+                    : 'bg-gray-200 rounded-bl-none w-32 sm:w-40 h-10'
                 }`}></div>
-                <div className='h-3 bg-gray-200 rounded mt-1 w-16 animate-pulse'></div>
+                <div className='h-2 sm:h-3 bg-gray-200 rounded mt-1 w-12 sm:w-16 animate-pulse'></div>
               </div>
             ))
           ) : (
@@ -122,7 +122,7 @@ const ChatBox = () => {
               
               return (
                 <div key={index} className={`flex flex-col ${isSentByCurrentUser ? 'items-end' : 'items-start'}`}>
-                  <div className={`p-3 text-sm max-w-sm rounded-lg shadow break-words ${
+                  <div className={`p-2 sm:p-3 text-xs sm:text-sm max-w-xs rounded-lg shadow break-words ${
                     isSentByCurrentUser 
                       ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-br-none' 
                       : 'bg-gray-200 text-slate-800 rounded-bl-none'
@@ -132,7 +132,7 @@ const ChatBox = () => {
                         <img 
                           src={message.media_url} 
                           alt="" 
-                          className='w-full max-w-sm rounded-lg mb-1 cursor-pointer hover:brightness-95 transition'
+                          className='w-full max-w-xs rounded-lg mb-1 cursor-pointer hover:brightness-95 transition'
                           onClick={() => {
                             const isUrl = message.text && /^https?:\/\//.test(message.text)
                             if (isUrl) {
@@ -144,16 +144,16 @@ const ChatBox = () => {
                         />
                       )
                     }
-                    {message.text && <p>{message.text}</p>}
+                    {message.text && <p className='text-xs sm:text-sm'>{message.text}</p>}
                   </div>
-                  <p className={`text-gray-500 text-[12px] p-[3px] font-medium ${isSentByCurrentUser ? 'text-right' : 'text-left'}`}>{formatMessageTime(message.createdAt)}</p>
+                  <p className={`text-gray-500 text-[10px] sm:text-[12px] p-[2px] sm:p-[3px] font-medium ${isSentByCurrentUser ? 'text-right' : 'text-left'}`}>{formatMessageTime(message.createdAt)}</p>
                 </div>
               )
             })
           )}
           {sending && (
             <div className='flex flex-col items-end'>
-              <div className='p-3 text-sm max-w-sm rounded-lg shadow bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-br-none flex items-center gap-2'>
+              <div className='p-2 sm:p-3 text-xs sm:text-sm max-w-sm rounded-lg shadow bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-br-none flex items-center gap-2'>
                 <span className='inline-flex'>
                   <span className='animate-bounce' style={{ animationDelay: '0s' }}>.</span>
                   <span className='animate-bounce' style={{ animationDelay: '0.2s' }}>.</span>
@@ -165,21 +165,21 @@ const ChatBox = () => {
           <div ref={messagesEndRef} />
         </div>
       </div>
-      <div className='px-4'>
-        <div className='flex items-center gap-3 pl-5 p-1.5 bg-white w-full max-w-xl mx-auto border border-gray-200 shadow rounded-full mb-5'>
-          <input type="text" className='flex-1 outline-none text-slate-700' placeholder='Type a message...' name="" id="" onKeyDown={e =>e.key === 'Enter' && !sending && sendMessage()} onChange={(e) => setText(e.target.value)} value={text} disabled={sending} />
+      <div className='px-2 sm:px-4 pb-2 sm:pb-4'>
+        <div className='flex items-center gap-2 sm:gap-3 pl-3 sm:pl-5 p-1.5 bg-white w-full mx-auto border border-gray-200 shadow rounded-full'>
+          <input type="text" className='flex-1 outline-none text-slate-700 text-xs sm:text-sm' placeholder='Message...' name="" id="" onKeyDown={e =>e.key === 'Enter' && !sending && sendMessage()} onChange={(e) => setText(e.target.value)} value={text} disabled={sending} />
           <label htmlFor="image">
             {
-              image ? <img src={URL.createObjectURL(image)} className='h-8 rounded' alt="" /> : <ImageIcon className={`size-7 cursor-pointer ${sending ? 'text-gray-300' : 'text-gray-400'}`} />
+              image ? <img src={URL.createObjectURL(image)} className='h-6 sm:h-8 rounded' alt="" /> : <ImageIcon className={`size-5 sm:size-6 cursor-pointer flex-shrink-0 ${sending ? 'text-gray-300' : 'text-gray-400'}`} />
             }
             <input type="file" id='image' accept='image/*' hidden onChange={(e) => setImage(e.target.files[0])} disabled={sending} />
           </label>
-          <button onClick={sendMessage} disabled={sending} className={`cursor-pointer p-2 rounded-full transition-all ${
+          <button onClick={sendMessage} disabled={sending} className={`cursor-pointer p-1.5 sm:p-2 rounded-full transition-all flex-shrink-0 ${
             sending 
               ? 'bg-gray-300 text-gray-500' 
               : 'bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-700 hover:to-purple-800 active:scale-95 text-white'
           }`}>
-            <SendHorizonal size={18} />
+            <SendHorizonal size={16} className='sm:w-5 sm:h-5' />
           </button>
         </div>
       </div>

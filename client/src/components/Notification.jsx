@@ -8,7 +8,7 @@ const Notification = ({ t, message }) => {
     const navigate = useNavigate()
 
     return (
-        <div className={`max-w-md w-full bg-white shadow-lg rounded-lg flex border border-gray-300 hover:scale-105 transition`}>
+        <div className={`max-w-md w-full bg-white/95 shadow-lg rounded-lg flex border border-gray-300 hover:scale-105 transition backdrop-blur-sm`}>
             <div className='flex-1 p-4'>
                 <div className='flex items-start'>
                     <img src={message.from_user_id.profile_picture || DEFAULT_PROFILE_PICTURE} alt="" className='h-10 w-10 rounded-full flex-shrink-0 mt-0.5' />

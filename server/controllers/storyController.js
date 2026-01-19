@@ -125,11 +125,17 @@ export const toggleStoryLike = async (req, res) => {
 //Get story viewers
 export const getStoryViewers = async (req, res) => {
     try {
+        const userId = req.userId
         const { storyId } = req.params
 
         const story = await Story.findById(storyId).populate('views_count', 'full_name username profile_picture _id')
         if (!story) {
             return res.json({ success: false, message: "Story not found" })
+        }
+
+        // Only allow the story owner to view the list of viewers
+        if (story.user.toString() !== userId) {
+            return res.json({ success: false, message: "You can only view your own story viewers" })
         }
 
         res.json({ success: true, viewers: story.views_count })

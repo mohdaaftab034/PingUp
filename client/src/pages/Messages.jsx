@@ -18,35 +18,35 @@ const Messages = () => {
 
   return (
     <div className="min-h-screen relative bg-slate-50">
-      <div className="max-w-6xl mx-auto p-6">
+      <div className="max-w-6xl mx-auto p-3 sm:p-6">
         {/* Title */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Messages</h1>
-          <p className="text-slate-600">Talk to your friends and family</p>
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-1 sm:mb-2">Messages</h1>
+          <p className="text-sm sm:text-base text-slate-600">Talk to your friends and family</p>
         </div>
         {/* connected user */}
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2 sm:gap-3">
           {!loading ? (
             connections.length > 0 ? (
               connections.map((user) => (
                 <div
                   key={user._id}
-                  className="max-w-xl flex flex-warp gap-5 p-6 bg-white shadow rounded-md hover:shadow-lg transition-shadow"
+                  className="max-w-xl flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-5 p-4 sm:p-6 bg-white shadow rounded-md hover:shadow-lg transition-shadow"
                 >
                   <img
                     onClick={() => navigate(`/profile/${user._id}`)}
                     src={user.profile_picture || DEFAULT_PROFILE_PICTURE}
-                    className="cursor-pointer rounded-full size-12 mx-auto"
+                    className="cursor-pointer rounded-full size-12 mx-auto sm:mx-0"
                     alt=""
                   />
-                  <div className="flex-1">
-                    <p className="font-medium cursor-pointer text-slate-700">
+                  <div className="flex-1 text-center sm:text-left">
+                    <p className="font-medium cursor-pointer text-slate-700 text-sm sm:text-base">
                       {user.full_name}
                     </p>
-                    <p className="text-slate-500">@{user.username}</p>
-                    <p className="text-sm text-gray-600">{user.bio}</p>
+                    <p className="text-slate-500 text-xs sm:text-sm">@{user.username}</p>
+                    <p className="text-xs sm:text-sm text-gray-600 line-clamp-1">{user.bio}</p>
                   </div>
-                  <div className="flex flex-col gap-2 mt-4">
+                  <div className="flex flex-row sm:flex-col gap-2 justify-center sm:justify-start">
                     <Button
                       variant='secondary'
                       size='sm'
@@ -66,7 +66,7 @@ const Messages = () => {
               ))
             ) : (
               <div className="text-center py-10">
-                <p className="text-gray-500 text-lg">
+                <p className="text-gray-500 text-base sm:text-lg">
                   No connections yet. Start connecting with people!
                 </p>
               </div>
@@ -78,15 +78,15 @@ const Messages = () => {
               .map((_, i) => (
                 <div
                   key={i}
-                  className="max-w-xl flex flex-warp gap-5 p-6 bg-white shadow rounded-md animate-pulse"
+                  className="max-w-xl flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-5 p-4 sm:p-6 bg-white shadow rounded-md animate-pulse"
                 >
-                  <div className="rounded-full size-12 bg-gray-200 mx-auto"></div>
+                  <div className="rounded-full size-12 bg-gray-200 mx-auto sm:mx-0"></div>
                   <div className="flex-1">
-                    <div className="h-4 bg-gray-200 rounded w-32 mb-2"></div>
-                    <div className="h-3 bg-gray-100 rounded w-20 mb-2"></div>
+                    <div className="h-4 bg-gray-200 rounded w-32 mb-2 mx-auto sm:mx-0"></div>
+                    <div className="h-3 bg-gray-100 rounded w-20 mb-2 mx-auto sm:mx-0"></div>
                     <div className="h-3 bg-gray-100 rounded w-full"></div>
                   </div>
-                  <div className="flex flex-col gap-2 mt-4">
+                  <div className="flex flex-row sm:flex-col gap-2 justify-center sm:justify-start">
                     <div className="size-10 bg-gray-200 rounded"></div>
                     <div className="size-10 bg-gray-200 rounded"></div>
                   </div>

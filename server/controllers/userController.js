@@ -2,6 +2,7 @@ import imagekit from "../configs/imageKit.js";
 import { inngest } from "../inngest/index.js";
 import Connection from "../models/connection.js";
 import Post from "../models/postModel.js";
+import Reel from "../models/reelModel.js";
 import fs from 'fs'
 import User from "../models/userModel.js";
 
@@ -303,7 +304,13 @@ export const getUserProfiles = async (req, res) => {
             .populate('user')
             .populate('comment.user', 'username full_name profile_picture')
 
-        res.json({success: true, profile, posts})
+        const reels = await Reel.find({ user: profileId })
+            .populate('user', 'full_name username profile_picture _id')
+            .populate('likes', '_id')
+            .populate('comments.user', 'full_name username profile_picture _id')
+            .sort({ createdAt: -1 })
+
+        res.json({success: true, profile, posts, reels})
         
     } catch (error) {
         console.log(error)
