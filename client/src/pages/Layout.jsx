@@ -22,6 +22,7 @@ const Layout = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const isReelsPage = location.pathname === '/reels' || location.pathname.startsWith('/reels/')
+  const isMessagesPage = location.pathname === '/messages' || location.pathname.startsWith('/messages/')
 
   // Poll for new connection request notifications
   useEffect(() => {
@@ -110,7 +111,7 @@ const Layout = () => {
         )}
 
         {/* Bottom Navbar for Mobile */}
-        {!isReelsPage && (
+        {!isReelsPage && !isMessagesPage && (
           <div className='sm:hidden fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-gray-200 shadow-lg'>
             <div className='flex items-center justify-around py-1.5'>
               <NavLink to='/' end className={({isActive}) => `flex flex-col items-center p-2 ${isActive ? 'text-indigo-600' : 'text-gray-600'}`}>
