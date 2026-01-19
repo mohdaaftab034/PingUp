@@ -31,23 +31,29 @@ const Sidebar = ({sidebarOpen, setSidebarOpen}) => {
                 Create
             </button>
         </div>
-        <div className='w-full border-t border-gray-200 p-4 px-7 flex items-center justify-between'>
-            <div className='flex gap-2 items-center cursor-pointer'>
+        <div className='w-full border-t border-gray-200 p-3 sm:p-4 px-4 sm:px-7 flex items-center justify-between gap-2 sm:gap-0'>
+            <div className='flex gap-2 items-center cursor-pointer min-w-0'>
                 {
                     user?.profile_picture ? (
-                        <img src={user.profile_picture || DEFAULT_PROFILE_PICTURE} className='w-10 h-10 rounded-full shadow' alt="profile" />
+                        <img src={user.profile_picture || DEFAULT_PROFILE_PICTURE} className='w-10 h-10 rounded-full shadow flex-shrink-0' alt="profile" />
                     ) : (
-                        <div className='w-10 h-10 rounded-full bg-indigo-200 text-indigo-800 flex items-center justify-center font-semibold shadow'>
+                        <div className='w-10 h-10 rounded-full bg-indigo-200 text-indigo-800 flex items-center justify-center font-semibold shadow flex-shrink-0'>
                             {user?.full_name?.charAt(0) || '?'}
                         </div>
                     )
                 }
-                <div>
-                    <h1 className='text-sm font-medium'>{user.full_name}</h1>
-                    <p className='text-xs text-gray-500'>@{user.username}</p>
+                <div className='hidden sm:block min-w-0'>
+                    <h1 className='text-sm font-medium truncate'>{user.full_name}</h1>
+                    <p className='text-xs text-gray-500 truncate'>@{user.username}</p>
                 </div>
             </div>
-            <LogOut onClick={logout} className='w-4.5 text-gray-400 hover:text-gray-700 transition cursor-pointer'/>
+            <button 
+                onClick={logout}
+                className='p-2 hover:bg-gray-100 rounded-lg transition flex-shrink-0 flex items-center justify-center'
+                title="Logout"
+            >
+                <LogOut className='w-5 h-5 sm:w-4 sm:h-4 text-gray-400 hover:text-gray-700 transition cursor-pointer'/>
+            </button>
         </div>
 
         {/* Upload Options Modal */}

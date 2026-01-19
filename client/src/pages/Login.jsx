@@ -72,7 +72,7 @@ const Login = () => {
     }
 
     return (
-        <div className='min-h-screen w-full flex relative overflow-hidden bg-slate-900'>
+        <div className='min-h-screen w-screen flex relative overflow-hidden bg-slate-900'>
 
             {/* --- Animated Background Gradient (CSS Only fallback if image fails) --- */}
             <div className="absolute inset-0 z-0">
@@ -86,15 +86,15 @@ const Login = () => {
                 />
             </div>
 
-            <div className="container mx-auto flex flex-col md:flex-row h-full z-10 relative">
+            <div className="w-full flex flex-col md:flex-row z-10 relative min-h-screen">
 
-                {/* --- Left Side: Brand Identity --- */}
-                <div className='flex-1 flex flex-col justify-center p-8 md:p-16 lg:p-24'>
+                {/* --- Left Side: Brand Identity (Hidden on mobile) --- */}
+                <div className='hidden md:flex flex-1 flex-col justify-center p-8 lg:p-16'>
                     <motion.div
                         initial="hidden"
                         animate="visible"
                         variants={slideUp}
-                        className="space-y-8"
+                        className="space-y-6 lg:space-y-8"
                     >
                         {/* Logo Area */}
                         <div className='flex items-center gap-3'>
@@ -104,57 +104,57 @@ const Login = () => {
 
                         {/* Hero Text */}
                         <div>
-                            <h1 className='text-4xl md:text-6xl font-extrabold text-white leading-tight mb-6'>
+                            <h1 className='text-3xl lg:text-5xl font-extrabold text-white leading-tight mb-4 lg:mb-6'>
                                 Connect beyond <br />
                                 <span className='text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-pink-400'>
                                     the timeline.
                                 </span>
                             </h1>
-                            <p className='text-lg text-slate-300 max-w-md leading-relaxed'>
+                            <p className='text-sm lg:text-base text-slate-300 max-w-md leading-relaxed'>
                                 Join the global community where conversations happen in real-time. Share your world, uncensored and unfiltered.
                             </p>
                         </div>
 
                         {/* Social Proof */}
-                        <div className='flex items-center gap-4 pt-4'>
+                        <div className='flex items-center gap-3 lg:gap-4 pt-2 lg:pt-4'>
                             <div className="flex -space-x-3">
                                 {[1, 2, 3, 4].map((i) => (
-                                    <div key={i} className="w-10 h-10 rounded-full border-2 border-slate-900 bg-slate-700 overflow-hidden">
+                                    <div key={i} className="w-8 lg:w-10 h-8 lg:h-10 rounded-full border-2 border-slate-900 bg-slate-700 overflow-hidden">
                                         <img src={`https://i.pravatar.cc/100?img=${i + 10}`} alt="" className="w-full h-full object-cover" />
                                     </div>
                                 ))}
-                                <div className="w-10 h-10 rounded-full border-2 border-slate-900 bg-indigo-600 flex items-center justify-center text-xs font-bold text-white">
+                                <div className="w-8 lg:w-10 h-8 lg:h-10 rounded-full border-2 border-slate-900 bg-indigo-600 flex items-center justify-center text-[10px] lg:text-xs font-bold text-white">
                                     +12k
                                 </div>
                             </div>
                             <div className='flex flex-col'>
                                 <div className='flex text-amber-400'>
-                                    {[...Array(5)].map((_, i) => <Star key={i} size={14} fill="currentColor" />)}
+                                    {[...Array(5)].map((_, i) => <Star key={i} size={12} fill="currentColor" />)}
                                 </div>
-                                <span className='text-sm text-slate-400 font-medium'>Trusted by developers</span>
+                                <span className='text-xs text-slate-400 font-medium'>Trusted by developers</span>
                             </div>
                         </div>
                     </motion.div>
                 </div>
 
                 {/* --- Right Side: Auth Form --- */}
-                <div className='flex-1 flex items-center justify-center p-4 md:p-10'>
+                <div className='flex-1 flex items-center justify-center p-4 sm:p-6 md:p-8 lg:p-10'>
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.5, delay: 0.2 }}
-                        className='w-full max-w-[420px] bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl rounded-3xl p-8'
+                        className='w-full max-w-[420px] bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl rounded-3xl p-6 sm:p-8'
                     >
-                        <div className='mb-8'>
-                            <h2 className='text-3xl font-bold text-white mb-2'>
+                        <div className='mb-6 sm:mb-8'>
+                            <h2 className='text-2xl sm:text-3xl font-bold text-white mb-2'>
                                 {mode === 'login' ? 'Welcome back' : 'Join PingUp'}
                             </h2>
-                            <p className='text-slate-400'>
+                            <p className='text-xs sm:text-sm text-slate-400'>
                                 {mode === 'login' ? 'Enter your credentials to access your account.' : 'Start your journey with us today.'}
                             </p>
                         </div>
 
-                        <form className='space-y-5' onSubmit={handleSubmit}>
+                        <form className='space-y-4 sm:space-y-5' onSubmit={handleSubmit}>
                             <AnimatePresence mode='wait'>
                                 {mode === 'register' && (
                                     <motion.div
@@ -162,28 +162,28 @@ const Login = () => {
                                         initial={{ opacity: 0, height: 0 }}
                                         animate={{ opacity: 1, height: 'auto' }}
                                         exit={{ opacity: 0, height: 0 }}
-                                        className="space-y-5 overflow-hidden"
+                                        className="space-y-4 sm:space-y-5 overflow-hidden"
                                     >
                                         <div className="group">
                                             <div className="relative">
-                                                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-400 transition-colors" size={20} />
+                                                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-400 transition-colors" size={18} />
                                                 <input
                                                     name='full_name'
                                                     value={form.full_name}
                                                     onChange={handleChange}
-                                                    className='w-full bg-slate-900/50 border border-slate-700 text-white rounded-xl pl-10 pr-4 py-3 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all placeholder:text-slate-600'
+                                                    className='w-full bg-slate-900/50 border border-slate-700 text-white rounded-xl pl-10 pr-4 py-2.5 sm:py-3 text-sm sm:text-base outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all placeholder:text-slate-600'
                                                     placeholder='Full Name'
                                                 />
                                             </div>
                                         </div>
                                         <div className="group">
                                             <div className="relative">
-                                                <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-400 transition-colors" size={20} />
+                                                <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-400 transition-colors" size={18} />
                                                 <input
                                                     name='username'
                                                     value={form.username}
                                                     onChange={handleChange}
-                                                    className='w-full bg-slate-900/50 border border-slate-700 text-white rounded-xl pl-10 pr-4 py-3 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all placeholder:text-slate-600'
+                                                    className='w-full bg-slate-900/50 border border-slate-700 text-white rounded-xl pl-10 pr-4 py-2.5 sm:py-3 text-sm sm:text-base outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all placeholder:text-slate-600'
                                                     placeholder='Username'
                                                 />
                                             </div>
@@ -194,13 +194,13 @@ const Login = () => {
 
                             <div className="group">
                                 <div className="relative">
-                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-400 transition-colors" size={20} />
+                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-400 transition-colors" size={18} />
                                     <input
                                         type='email'
                                         name='email'
                                         value={form.email}
                                         onChange={handleChange}
-                                        className='w-full bg-slate-900/50 border border-slate-700 text-white rounded-xl pl-10 pr-4 py-3 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all placeholder:text-slate-600'
+                                        className='w-full bg-slate-900/50 border border-slate-700 text-white rounded-xl pl-10 pr-4 py-2.5 sm:py-3 text-sm sm:text-base outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all placeholder:text-slate-600'
                                         placeholder='Email Address'
                                     />
                                 </div>
@@ -208,13 +208,13 @@ const Login = () => {
 
                             <div className="group">
                                 <div className="relative">
-                                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-400 transition-colors" size={20} />
+                                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-400 transition-colors" size={18} />
                                     <input
                                         type={showPassword ? 'text' : 'password'}
                                         name='password'
                                         value={form.password}
                                         onChange={handleChange}
-                                        className='w-full bg-slate-900/50 border border-slate-700 text-white rounded-xl pl-10 pr-12 py-3 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all placeholder:text-slate-600'
+                                        className='w-full bg-slate-900/50 border border-slate-700 text-white rounded-xl pl-10 pr-12 py-2.5 sm:py-3 text-sm sm:text-base outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all placeholder:text-slate-600'
                                         placeholder='Password'
                                     />
                                     <button
@@ -222,38 +222,38 @@ const Login = () => {
                                         onClick={() => setShowPassword(!showPassword)}
                                         className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
                                     >
-                                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                                     </button>
                                 </div>
                             </div>
 
                             {mode === 'login' && (
                                 <div className='flex justify-end'>
-                                    <a href="#" className='text-sm text-indigo-400 hover:text-indigo-300 transition-colors'>
+                                    <a href="#" className='text-xs sm:text-sm text-indigo-400 hover:text-indigo-300 transition-colors'>
                                         Forgot Password?
                                     </a>
                                 </div>
                             )}
 
-                            <div className="pt-2">
+                            <div className="pt-1 sm:pt-2">
                                 <Button
                                     type='submit'
                                     variant='primary'
                                     size='lg'
                                     loading={authLoading}
-                                    className='w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-xl shadow-lg shadow-indigo-500/30 transition-all transform hover:scale-[1.02] active:scale-[0.98]'
+                                    className='w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2.5 sm:py-3 rounded-xl text-sm sm:text-base shadow-lg shadow-indigo-500/30 transition-all transform hover:scale-[1.02] active:scale-[0.98]'
                                 >
                                     <span className="flex items-center justify-center gap-2">
                                         {mode === 'login' ? 'Sign In' : 'Create Account'}
-                                        {!authLoading && <ArrowRight size={18} />}
+                                        {!authLoading && <ArrowRight size={16} />}
                                     </span>
                                 </Button>
                             </div>
                         </form>
 
                         {/* Toggle Mode */}
-                        <div className='mt-8 pt-6 border-t border-white/10 text-center'>
-                            <p className='text-slate-400'>
+                        <div className='mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-white/10 text-center'>
+                            <p className='text-xs sm:text-sm text-slate-400'>
                                 {mode === 'login' ? "Don't have an account?" : "Already have an account?"}
                                 <button
                                     onClick={() => setMode(mode === 'login' ? 'register' : 'login')}

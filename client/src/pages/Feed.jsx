@@ -65,11 +65,11 @@ const Feed = () => {
   }, [])
 
   return (
-    <div className='h-full overflow-y-scroll no-scrollbar py-4 sm:py-6 lg:py-10 flex items-start justify-center gap-4 sm:gap-6 lg:gap-8'>
+    <div className='h-full overflow-y-scroll no-scrollbar py-4 sm:py-6 lg:py-10 flex items-start justify-center gap-4 sm:gap-6 lg:gap-8 px-0'>
       {/* stories and post list */}
-      <div className='w-full max-w-2xl px-3 sm:px-4'>
+      <div className='w-full max-w-2xl px-0'>
         {!loading && <Storiesbar/>}
-        <div className='p-2 sm:p-4 space-y-4 sm:space-y-6'>
+        <div className='p-3 sm:p-4 space-y-4 sm:space-y-6'>
           {!loading ? (
             feeds.length > 0 ? (
               feeds.map((item) => {

@@ -1,9 +1,12 @@
-import { Calendar, MapPin, PenBox, Verified } from 'lucide-react'
+import { Calendar, MapPin, PenBox, Verified, LogOut } from 'lucide-react'
 import moment from 'moment'
 import React from 'react'
 import { DEFAULT_PROFILE_PICTURE } from '../assets/assets'
+import { useAuth } from '../context/AuthProvider.jsx'
 
 const UserProfileInfo = ({user, posts, profileId, setShowEdit}) => {
+  const { logout } = useAuth()
+  
   return (
     <div className='relative py-4 px-6 md:px-8 bg-white'>
         <div className='flex flex-col md:flex-row items-start gap-6'>
@@ -13,7 +16,7 @@ const UserProfileInfo = ({user, posts, profileId, setShowEdit}) => {
             </div>
 
             <div className='w-full pt-16 md:pt-0 md:pl-36'>
-                <div className='flex flex-col md:flex-row items-start justify-between'>
+                <div className='flex flex-col md:flex-row items-start justify-between gap-4'>
                     <div>
                         <div className='flex items-center gap-3'>
                             <h1 className='text-2xl font-bold text-gray-900'>{user.full_name}</h1>
@@ -23,10 +26,16 @@ const UserProfileInfo = ({user, posts, profileId, setShowEdit}) => {
                     </div>
                     {/* if user is not on others profile that means he is opening his profile so we will give edit button  */}
                     {!profileId && 
-                    <button onClick={()=> setShowEdit(true)} className='flex cursor-pointer items-center gap-2 border border-gray-300 hover:bg-gray-50 px-4 py-2 rounded-lg font-medium transition-colors mt-4 md:mt-0'>
-                        <PenBox className='w-4 h-4'/> 
-                        Edit
-                    </button>}
+                    <div className='flex flex-col xs:flex-row gap-2 w-full xs:w-auto'>
+                      <button onClick={()=> setShowEdit(true)} className='flex cursor-pointer items-center justify-center gap-2 border border-gray-300 hover:bg-gray-50 px-4 py-2 rounded-lg font-medium transition-colors'>
+                          <PenBox className='w-4 h-4'/> 
+                          Edit
+                      </button>
+                      <button onClick={logout} className='flex cursor-pointer items-center justify-center gap-2 border border-red-300 hover:bg-red-50 text-red-600 px-4 py-2 rounded-lg font-medium transition-colors md:hidden'>
+                          <LogOut className='w-4 h-4'/> 
+                          Logout
+                      </button>
+                    </div>}
                 </div>
                 <p className='text-gray-700 text-sm max-w-md mt-4'>{user.bio}</p>
 
