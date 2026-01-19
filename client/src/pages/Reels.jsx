@@ -299,13 +299,13 @@ const Reels = () => {
         <div className='fixed inset-0 overflow-hidden bg-black lg:flex lg:items-center lg:justify-center'>
             <div 
                 ref={containerRef}
-                className='h-screen w-full lg:h-screen lg:w-[480px] overflow-y-scroll snap-y snap-mandatory bg-black hide-scrollbar'
-                style={{ scrollBehavior: reelId ? 'auto' : 'smooth' }}
+                className='h-[calc(100vh-56px)] w-full lg:h-[calc(100vh-84px)] lg:w-[480px] overflow-y-scroll snap-y snap-mandatory bg-black hide-scrollbar'
+                style={{ scrollBehavior: reelId ? 'auto' : 'smooth', paddingBottom: '0px' }}
         >
             {reels.map((reel, index) => (
                 <div 
                     key={reel._id} 
-                    className='h-screen w-full snap-start snap-always relative flex flex-col bg-black'
+                    className='h-full w-full snap-start snap-always relative flex flex-col bg-black'
                 >
                     {/* Top Controls - Back & Upload Buttons */}
                     <div className='absolute top-2 sm:top-4 left-3 sm:left-4 right-3 sm:right-4 z-40 flex items-center justify-between'>
@@ -344,7 +344,7 @@ const Reels = () => {
                     </div>
 
                     {/* User Info Overlay on Video */}
-                    <div className='absolute bottom-13 sm:bottom-14 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent px-3 sm:px-4 py-2 sm:py-3'>
+                    <div className='absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent px-3 sm:px-4 py-2 sm:py-3'>
                         <div className='flex-1'>
                             <div 
                                 onClick={() => navigate(`/profile/${reel.user._id}`)}
