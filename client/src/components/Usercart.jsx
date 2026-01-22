@@ -60,36 +60,36 @@ const Usercart = ({user}) => {
     }
 
   return (
-    <div key={user._id} className='p-3 sm:p-4 pt-4 sm:pt-6 flex flex-col justify-between w-full sm:w-80 shadow border border-gray-200 rounded-md'>
+    <div key={user._id} className='p-3 sm:p-4 md:p-5 pt-4 sm:pt-5 md:pt-6 flex flex-col justify-between w-full shadow-md hover:shadow-lg border border-gray-200 rounded-lg transition-all duration-300 bg-white'>
         <div className='text-center'>
-            <img onClick={()=> navigate(`/profile/${user._id}`)}  src={user.profile_picture || DEFAULT_PROFILE_PICTURE} alt="" className='rounded-full cursor-pointer w-14 sm:w-16 shadow-md mx-auto' />
-            <p onClick={()=> navigate(`/profile/${user._id}`)}  className='mt-3 sm:mt-4 font-semibold text-sm sm:text-base line-clamp-1'>{user.full_name}</p>
-            {user.username && <p className='text-gray-500 cursor-pointer font-light text-xs sm:text-sm'>@{user.username}</p>}
-            {user.bio && <p className='text-gray-600 mt-2 text-center text-xs sm:text-sm px-2 sm:px-4 line-clamp-2'>{user.bio}</p>}
+            <img onClick={()=> navigate(`/profile/${user._id}`)}  src={user.profile_picture || DEFAULT_PROFILE_PICTURE} alt="" className='rounded-full cursor-pointer w-12 sm:w-14 md:w-16 shadow-md mx-auto hover:scale-105 transition-transform' />
+            <p onClick={()=> navigate(`/profile/${user._id}`)}  className='mt-2 sm:mt-3 md:mt-4 font-semibold text-xs sm:text-sm md:text-base line-clamp-1 cursor-pointer hover:text-indigo-600 transition-colors'>{user.full_name}</p>
+            {user.username && <p className='text-gray-500 cursor-pointer font-light text-[10px] sm:text-xs md:text-sm truncate px-2'>@{user.username}</p>}
+            {user.bio && <p className='text-gray-600 mt-1 sm:mt-2 text-center text-[10px] sm:text-xs md:text-sm px-1 sm:px-2 md:px-3 line-clamp-2 min-h-[2.5rem] sm:min-h-[3rem]'>{user.bio}</p>}
         </div>
 
-        <div className='flex flex-col gap-1.5 sm:gap-2 mt-3 sm:mt-4 text-[11px] sm:text-xs text-gray-600'>
-            <div className='flex items-center justify-center gap-1 border border-gray-300 rounded-full px-2 sm:px-3 py-1'>
-                <MapPin className='w-3 sm:w-4 h-3 sm:h-4 flex-shrink-0'/> <span className='truncate'>{user.location}</span>
+        <div className='flex flex-col gap-1.5 sm:gap-2 mt-2 sm:mt-3 md:mt-4 text-[10px] sm:text-[11px] md:text-xs text-gray-600'>
+            <div className='flex items-center justify-center gap-1 border border-gray-300 rounded-full px-2 sm:px-3 py-0.5 sm:py-1 bg-gray-50'>
+                <MapPin className='w-2.5 sm:w-3 md:w-4 h-2.5 sm:h-3 md:h-4 flex-shrink-0'/> <span className='truncate max-w-[120px] sm:max-w-full'>{user.location}</span>
             </div>
 
-            <div className='flex items-center justify-center gap-1 border border-gray-300 rounded-full px-2 sm:px-3 py-1'>
-                <span>{user.followers.length}</span> <span className='hidden xs:inline'>Followers</span>
+            <div className='flex items-center justify-center gap-1 border border-gray-300 rounded-full px-2 sm:px-3 py-0.5 sm:py-1 bg-gray-50'>
+                <span className='font-medium'>{user.followers.length}</span> <span>Followers</span>
             </div>
         </div>
         
-        <div className='flex mt-3 sm:mt-4 gap-1.5 sm:gap-2'>
+        <div className='flex mt-2 sm:mt-3 md:mt-4 gap-1.5 sm:gap-2'>
             {/* Follow Button - hidden if already following or self */}
             {(!isFollowing && !isSelf) && (
-                <button onClick={handleFollow} className='flex-1 py-1.5 sm:py-2 rounded-md flex justify-center items-center gap-1 sm:gap-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 active:scale-95 transition text-white cursor-pointer text-xs sm:text-sm'>
-                    <UserPlus className='w-3 sm:w-4 h-3 sm:h-4'/> <span className='hidden xs:inline'>Follow</span>
+                <button onClick={handleFollow} className='flex-1 py-1.5 sm:py-2 rounded-lg flex justify-center items-center gap-1 sm:gap-1.5 md:gap-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 active:scale-95 transition-all text-white cursor-pointer text-[10px] sm:text-xs md:text-sm font-medium shadow-sm'>
+                    <UserPlus className='w-3 sm:w-3.5 md:w-4 h-3 sm:h-3.5 md:h-4'/> <span>Follow</span>
                 </button>
             )}
 
             {/* Connection Request button - hidden if already connected or self */}
             {(!isConnected() && !isSelf) && (
-                <button onClick={handleConnectionRequest} className='flex items-center justify-center py-1.5 sm:py-2 px-2 sm:px-3 border border-gray-300 text-slate-500 group rounded-md cursor-pointer active:scale-95 transition hover:bg-slate-50'>
-                    <Plus className='w-4 sm:w-5 h-4 sm:h-5 group-hover:scale-105 transition'/>
+                <button onClick={handleConnectionRequest} className='flex items-center justify-center py-1.5 sm:py-2 px-2 sm:px-2.5 md:px-3 border border-gray-300 text-slate-500 group rounded-lg cursor-pointer active:scale-95 transition-all hover:bg-slate-50 hover:border-indigo-400 shadow-sm'>
+                    <Plus className='w-3.5 sm:w-4 md:w-5 h-3.5 sm:h-4 md:h-5 group-hover:scale-110 transition-transform'/>
                 </button>
             )}
         </div>
